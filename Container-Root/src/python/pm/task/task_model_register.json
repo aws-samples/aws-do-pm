@@ -1,0 +1,14 @@
+{
+    "technique_name": "model_registration",
+    "task_options": ["-it","--rm","-v",
+                    "${LOCAL_PATH}:/register",
+                    "-e", "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}",
+                    "-e", "AWS_OPTS=${AWS_OPTS}"],
+    "analyticSettings": {
+        "pm_s3_bucket": "${PM_S3_BUCKET}",
+        "pm_root_path": "${PM_ROOT_PATH}",
+        "local_path": "${LOCAL_PATH}",
+        "rel_model_filepath": "$4",
+        "description": "$5"
+    }
+}

@@ -1,0 +1,8 @@
+pandas
+numpy
+tqdm
+scipy
+joblib
+boto3
+matplotlib
+sklearn

@@ -1,0 +1,185 @@
+#!/bin/bash
+
+######################################################################
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. #
+# SPDX-License-Identifier: MIT-0                                     #
+######################################################################
+
+# aws-do-pm specific functions
+
+function help {
+        echo ""
+        echo "================================================================"
+        echo "            Predictive Modeling Command Line Interface          "
+        echo "================================================================"
+        echo ""
+        echo "Usage:"
+        echo "    $0 [--help]                         - show generic cli help"
+        echo "    $0 [target] [action] [arguments]    - perform action on specified task with specified arguments"
+        echo "    $0 [target] --help                  - show cli task specific help"
+        echo ""
+        echo "    targets:"
+        echo "        config                        - manage predictive modeling configuration"
+        echo "        system                        - execute predictive modeling system level tasks"
+        echo "        go [tags]                     - generate a task template from a technique that matches the specified spece-separated list of tags"
+        echo "        do <input_json_file_path>     - create and execute a task defined in the provided input json file"
+        echo "        technique                     - manage predictive modeling techniques"
+        echo "        data                          - manage datasets"
+        echo "        model                         - perform actions on predictive models"
+        echo "        service                       - perform actions on model services"
+        echo "        task                          - manage tasks"
+        echo ""
+}
+
+function help_config {
+        echo ""
+        echo "Usage:"
+        echo "    $0 config <action> [arguments]"
+        echo ""
+        echo "    actions:"
+        echo "        ls                            - list standard config items"
+        echo "        show [item]                   - show value of all or a single config item"
+        echo "        set  [[item] [value]]         - set values of all or a specific config item"
+	echo ""
+	echo "  items:"
+	echo "    AWS_ACCESS_KEY_ID     - key id for access to AWS API, if not specified, settings from 'aws configure' take effect"
+	echo "    AWS_SECRET_ACCESS_KEY - secret key for access to AWS API, if not specified, settings from 'aws configure' take effect"
+	echo "    REGION                - AWS default region, default: us-west-2"
+        echo "    REGISTRY              - container registry URI including trailing '/', can be blank if running locally"
+	echo "    BUILD_TO              - target orchestrator for building container images. Options: docker(default), compose"
+	echo "    PM_TO                 - target orchestrator for running aws-do-pm containers. Options: compose(default), kubernetes"
+	echo "    PROCESSOR             - target processor to run model operations on. Options: cpu(default), gpu"
+	echo "    PM_PLATFORM_SCALE     - number of platform containers to run (default: 1)"
+	echo "    PM_S3_BUCKET          - S3 bucket name for storing aws-do-pm data and models"
+        echo "    PM_GRAPHDB_SYSTEM_CR  - credential to configure for system access to the graph database"
+	echo "    PM_GRAPHDB_USER       - login id to configure for user access to the graph db"
+	echo "    PM_GRAPHDB_PWD        - credential to configure for user access to the graph database"
+        echo "    PV_TYPE               - persistent volume type, use 'efs'(default) for multi-node Kubernetes on AWS, and 'hostpath' for local deployments"
+	echo "    EFS_VOLUME_ID         - EFS file system id to use as a shared volume for aws-do-pm workloads (used only when PM_TO=kubernetes, default='')"
+	echo "    ALB_ALLOW_CIDRS       - comma-separated list of IP CIDRs that will be allowed to connect to aws-do-pm UIs (used only when PM_TO=kubernetes, default=0.0.0.0/0)"
+	echo "    KCFG_ENC              - base64 encoded kube config for aws-do-pm to use when orchestrating tasks on kubernetes (used only when PM_TO=kubernetes, default='')"
+	echo ""
+}
+
+function help_do {
+	echo ""
+	echo "Usage:"
+	echo "    $0 do <input_json_file_path>      - create and execute a task based on the provided input json file"
+	echo ""
+}
+
+function help_technique {
+        echo ""
+        echo "Usage:"
+        echo "    $0 technique <action> [arguments]"
+        echo ""
+        echo "    actions:"
+        echo "        ls                                        - list standard config items"
+        echo "        describe <technique_id>                   - describe an existing technique"
+        echo "        template <technique_id>                   - export task template from an existing technique"
+        echo "        register <config_json_filepath>           - add a new technique using the provided config json path"
+        echo "        remove <technique_id>                     - delete an existing technique"
+        echo ""
+        echo ""
+}
+
+PM_CONFIG_ITEMS=( AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY REGION REGISTRY BUILD_TO PM_TO PROCESSOR PM_PLATFORM_SCALE PM_S3_BUCKET PM_GRAPHDB_SYSTEM_CR PM_GRAPHDB_ID PM_GRAPHDB_CR PV_TYPE EFS_VOLUME_ID ALB_ALLOW_CIDRS KCFG_ENC )
+
+function config_show {
+	echo ""
+	echo "Current configuration:"
+	for index in ${!PM_CONFIG_ITEMS[@]}; do
+		CONFIG_ITEM_NAME=${PM_CONFIG_ITEMS[$index]}
+		CONFIG_ITEM_VALUE=${!CONFIG_ITEM_NAME}
+		echo "    ${CONFIG_ITEM_NAME}: ${CONFIG_ITEM_VALUE}"
+	done
+	echo ""
+}
+
+function help_system {
+	echo ""
+	echo "Usage: "
+	echo "    $0 system <action>"
+	echo ""
+	echo "    actions:"
+	echo "        init               - initialize system, create accounts and storage "
+	echo "        clear              - reset system to original state, destroy all services and erase all data "
+	echo ""
+}
+
+function help_data {
+        echo ""
+        echo "Usage: "
+        echo "    $0 data <action> [arguments]"
+        echo ""
+        echo "    actions:"
+        echo "        ls                                                     - list available datasets"
+        echo "        describe <id>                                          - describe dataset with the specified id"
+        echo "        register <local_path> <main_file> ['description']      - upload and register a dataset from a local path, include metadata about main filename and optional dataset description"
+        echo "        delete <id>                                            - delete dataset with the specified id"
+        echo ""
+}
+
+function help_model {
+        echo ""
+        echo "Usage: "
+        echo "    $0 model <action> [arguments]"
+        echo ""
+        echo "    actions:"
+        echo "        ls                                                           - list available models"
+        echo "        describe <model_id>                                          - describe specified model"
+        echo "        build <data_id>                                              - build model for the configured use case using the specified data"
+        echo "        register <folder_path> <model_filename> ['description']      - register model from the specified folder path and filename"
+	echo "                                                                       with the specified model file name, and optional description"
+	echo "        update <model_id|service_id> <data_id>                       - update model using the specified data"
+	echo "                                                                       model_id or service_id can be used interchangeably"
+        echo "        predict <model_id|service_id> <data_id>                      - predict with provided model and data"
+        echo "        sensitivity <model_id|service_id> <data_id>                  - perform sensitivity analysis on the specified model"
+        echo "        delete <model_id>                                            - delete the specified model"
+#        echo "        uq                            - perform uncertainty quantification"
+#        echo "        go                            - perform global optimization"
+        echo ""
+}
+
+function help_service {
+        echo ""
+        echo "Usage: "
+        echo "    $0 service <action>"
+        echo ""
+        echo "    actions:"
+        echo "        ls                                      - list available services"
+        echo "        deploy <model_id>                       - deploy specified model as a grpc service"
+	echo "        describe <service_id>                   - show specified service metadata"
+	echo "        status <service_id>                     - query and show service health"
+	echo "        configure <service_id> <model_id>       - configure the specified service with an updated model"
+        echo "        destroy <service_id>                    - stop and delete the specified service"
+        echo ""
+}
+
+function help_task {
+        echo ""
+        echo "Usage: "
+        echo "    $0 task <action>"
+        echo ""
+        echo "    actions:"
+        echo "        ls                                                  - list all tasks"
+        echo "        describe <task_id>                                  - display task metadata"
+        echo "        template <technique_id> <task_local_json_filepath>  - generate task template and save it in a local file"
+	echo "        create <task_local_json_filepath>                   - create a task from a local file and do not execute it"
+#	echo "        delete <task_id>                                    - delete a task that was created but not executed"
+	echo "        exec <task_id>                                      - execute a task that was created but not executed"
+	echo "        run <task_local_json_filepath>                      - create a task from a local file and then execute it"
+#        echo "        status <task_id>                                    - show current task status"
+#        echo "        interrupt <task_id>                                 - interrupt a running task"
+        echo ""
+}
+
+function newid() {
+	VERBOSE_MEM=$VERBOSE
+	./config.sh VERBOSE "false" > /dev/null
+        ./exec.sh job 1 python3 /app/lib/uid_generator.py > wd/pm.id
+        PM_ID=$(cat wd/pm.id | tr -d '\r')
+        ./config.sh VERBOSE "$VERBOSE_MEM" > /dev/null
+	echo "${PM_ID}"
+}
+

@@ -1,0 +1,7 @@
+{
+    "analyticSettings": {
+        "n_vehicles": "${NUM_VEHICLES}",
+        "n_routes": "${NUM_ROUTES}",
+        "rel_dest_path": "${DEST_PATH}"
+    }
+}

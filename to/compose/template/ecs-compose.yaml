@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+
+  ${CONTAINER}:
+    image: ${REGISTRY}${IMAGE}${TAG}
+    environment:
+      - PORT_INTERNAL=${PORT_INTERNAL}
+    ports:
+      - ${PORT_EXTERNAL}:${PORT_INTERNAL}
+    healthcheck:
+      test: ["bash","-c","curl http://localhost:${PORT_INTERNAL}/"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /aws/ecs/${ECS_CLUSTER}
+        awslogs-region: ${REGION}
+        awslogs-stream-prefix: ${ECS_CLUSTER}
+ 

@@ -1,0 +1,39 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: platform
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: platform
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+#  - type: Object
+#    object:
+#      metric:
+#        name: requests-per-second
+#      describedObject:
+#        apiVersion: networking.k8s.io/v1beta1
+#        kind: Service
+#        name: ${APP_NAME}
+#      target:
+#        type: Value
+#        value: 10
+#  - type: Pods
+#    pods:
+#      metric:
+#        name: packets-per-second
+#      target:
+#        type: AverageValue
+#        averageValue: 1k

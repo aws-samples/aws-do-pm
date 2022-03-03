@@ -1,0 +1,7 @@
+deploy:
+            resources:
+                reservations:
+                    devices:
+                        - capabilities: [gpu]
+                          driver: nvidia
+                          count: 1

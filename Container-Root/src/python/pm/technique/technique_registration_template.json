@@ -1,0 +1,14 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": [],
+    "technique_name": "",
+    "technique_description": "",
+    "node_name": "",
+    "task_target_orchestrator": "",
+    "task_options": [],
+    "task_container_image": "",
+    "task_executor_filepath": "",
+    "task_template": {}
+}

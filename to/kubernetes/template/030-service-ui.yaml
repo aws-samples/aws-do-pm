@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ui
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  ports:
+  - name: svc-port
+    port: ${PM_UI_PORT_EXT}
+    targetPort: pm-ui-port-int 
+  type: NodePort
+  selector:
+    app: ${APP_NAME}

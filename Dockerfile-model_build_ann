@@ -1,0 +1,21 @@
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+
+RUN apt-get update -y && \
+    apt-get install gcc g++ gfortran vim-tiny nano -y
+
+# Add container content
+ADD Container-Root/src/python/technique/model_build_ann /src/python/technique/model_build_ann
+ADD Container-Root/src/python/lib /src/python/lib
+
+# Install Python Libraries
+RUN pip install --upgrade pip
+RUN pip install -r /src/python/technique/model_build_ann/requirements.txt -U
+
+# Configure container
+ENV PYDEVD_WARN_EVALUATION_TIMEOUT=36000
+ENV PYTHONPATH="/src/python:${PYTHONPATH}"
+RUN sed -i /etc/vim/vimrc.tiny -e 's/set compatible/set nocompatible/g'
+RUN echo "alias ll='ls -alh --color=auto'" >> /root/.bashrc
+
+# Set work directory
+WORKDIR /

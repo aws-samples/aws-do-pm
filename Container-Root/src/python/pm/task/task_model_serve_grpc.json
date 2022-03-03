@@ -1,0 +1,6 @@
+{
+    "technique_name": "model_serve_grpc",
+    "analyticSettings": {
+        "rel_model_path": "model/<id>"
+    }
+}

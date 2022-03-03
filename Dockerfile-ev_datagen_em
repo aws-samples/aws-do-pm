@@ -1,0 +1,27 @@
+FROM python:3.9.0
+
+# Install common tools
+RUN apt-get update -y && \
+    apt-get install -y nano vim-tiny less curl unzip gettext-base
+
+# Add container content
+ADD Container-Root/src/python/example/ev/technique/ev_datagen_em /src/python/example/ev/technique/ev_datagen_em
+ADD Container-Root/src/python/example/ev/technique/ev_data_select /src/python/example/ev/technique/ev_data_select
+ADD Container-Root/src/python/example/ev/task /src/python/example/ev/task
+ADD Container-Root/src/python/lib /src/python/lib
+
+# Install Python Libraries
+RUN pip install --upgrade pip
+RUN pip install -r /src/python/example/ev/technique/ev_datagen_em/requirements.txt -U
+
+# Configure container
+ENV PYTHONPATH="/src/python:${PYTHONPATH}"
+RUN sed -i /etc/vim/vimrc.tiny -e 's/set compatible/set nocompatible/g'
+RUN echo "alias ll='ls -alh --color=auto'" >> /root/.bashrc
+
+ENV PYDEVD_WARN_EVALUATION_TIMEOUT=36000
+
+# Set work directory
+# Task path is passed as relative path to current directory and starts with (for example wd/task/<task_id>/task.json)
+# Either set working directory to parent of wd or create a symbolic link.
+WORKDIR /

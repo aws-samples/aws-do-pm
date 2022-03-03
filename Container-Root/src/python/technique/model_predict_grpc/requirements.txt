@@ -1,0 +1,12 @@
+pandas
+numpy
+scipy
+tqdm
+argparse
+grpcio
+protobuf
+grpcio-tools
+grpcio-health-checking
+matplotlib
+nanoid
+debugpy

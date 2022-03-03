@@ -1,0 +1,4 @@
+{
+    "technique_name": "model_service_destroy",
+    "input_artifacts": {"service": ["<id>"]}
+}

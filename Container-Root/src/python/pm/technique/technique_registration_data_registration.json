@@ -1,0 +1,39 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": ["data","register"],
+    "technique_name": "data_registration",
+    "technique_description": "Import data to storage and register it in the graph database",
+    "node_name": "data_registration",
+    "task_target_orchestrator": "python",
+    "task_container_image": "aws-do-pm-platform:latest",
+    "task_executor_filepath": "/src/python/pm/data/task_executor_register_data.py",
+    "task_template": 
+    {
+        "task_id": "<newid1>",
+        "task_name": "register",
+        "technique_name": "data_registration",
+        "task_options": ["-it","--rm"],
+        "processor": "cpu",
+        "node_name": "register",
+        "created_dt": "<timestamp>",
+        "analyticSettings": {
+            "pm_s3_bucket": "<pm_s3_bucket>",
+            "pm_root_path": "wd",
+            "local_path": "<path>",
+            "filename": "<main_file>",
+            "rel_dest_path": "data/<newid2>",
+            "description": "Registered dataset"
+        },
+        "inputs": {
+        },
+        "outputs":
+        {
+        },
+        "input_artifacts": {},
+        "output_artifacts": {"data":["<newid2>"]},
+        "savedState": {},
+        "status": ""
+    }
+}

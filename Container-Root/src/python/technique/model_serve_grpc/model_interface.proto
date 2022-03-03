@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+message HCReply {
+  string status = 1;
+}
+
+//service Health {
+//    rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+//}
+
+service ModelService {
+    rpc EvaluateModel(inRequest) returns (outCalc) {};
+    rpc HealthCheck(google.protobuf.Empty) returns (HCReply);
+}
+
+// input
+message inRequest {
+    bytes inp_dict_bytes = 1; // Our numpy image in bytes (serialized by pickle)
+}
+
+// output
+message outCalc {
+    bytes response_bytes = 1; // Our negative resized image in bytes (serialized by pickle)
+}

@@ -1,0 +1,94 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ui
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+    role: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+        role: ui
+    spec:
+      #nodeSelector:
+      #  beta.kubernetes.io/instance-type: "${INSTANCE_TYPE}"
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            role: ui
+      containers:
+      - name: main
+        image: "${REGISTRY}${IMAGE_NAME}-platform${TAG}"
+        imagePullPolicy: Always
+        command: ["streamlit"]
+        args: ['run','/src/python/ui/main_app.py','--server.port','${PM_UI_PORT_INT}']
+        env:
+        - name: PM_UI_PORT_INT
+          value: "${PM_UI_PORT_INT}"
+        - name: AWS_ACCESS_KEY_ID
+          value: "${AWS_ACCESS_KEY_ID}"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "${AWS_SECRET_ACCESS_KEY}"
+        - name: AWS_DEFAULT_REGION
+          value: "${AWS_DEFAULT_REGION}"
+        - name: AWS_OPTS
+          value: "${AWS_OPTS}"
+        - name: PM_ID_LENGTH
+          value: "${PM_ID_LENGTH}"
+        - name: PM_ROOT_PATH
+          value: "${PM_ROOT_PATH}"
+        - name: PM_GRAPHDB_URL
+          value: "${PM_GRAPHDB_URL_INT}"
+        - name: PM_GRAPHDB_SYSTEM_CR
+          value: "${PM_GRAPHDB_SYSTEM_CR}"
+        - name: PM_GRAPHDB_NAME
+          value: "${PM_GRAPHDB_NAME}"
+        - name: PM_GRAPHDB_ID
+          value: "${PM_GRAPHDB_ID}"
+        - name: PM_GRAPHDB_CR
+          value: "${PM_GRAPHDB_CR}"
+        - name: PM_GRAPHDB_GRAPH
+          value: "${PM_GRAPHDB_GRAPH}"
+        - name: PROCESSOR
+          value: "${PROCESSOR}"
+        - name: KCFG_ENC
+          value: "${KCFG_ENC}"
+        - name: REGISTRY
+          value: "${REGISTRY}"
+        - name: TO
+          value: "${TO}"
+        - name: EFS_WD_PVC_NAME
+          value: "${EFS_WD_PVC_NAME}"
+        ports:
+        - name: pm-ui-port-int
+          containerPort: ${PM_UI_PORT_INT}
+        volumeMounts:
+        - name: wd
+          mountPath: /wd
+        securityContext:
+          privileged: true
+      volumes:
+      - name: wd
+        persistentVolumeClaim:
+          claimName: pm-efs-wd-pvc
+      imagePullSecrets:
+          - name: regcred          
+        #resources:
+        #  limits:
+        #    cpu: 4
+        #    memory: 4Gi
+        #    nvidia.com/gpu: 1
+        #    k8s.amazonaws.com/vgpu: 5
+        #  requests:
+        #    cpu: "1"
+        #    memory: 1Gi   

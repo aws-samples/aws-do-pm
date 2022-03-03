@@ -1,0 +1,64 @@
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+
+# Install common tools
+RUN apt-get update -y && \
+    apt-get install -y gcc g++ gfortran nano vim-tiny vim iputils-ping dnsutils less curl unzip jq screen
+
+# Configure container
+ENV KUBECTL_COMMAND_HEADERS=false
+ENV PYTHONPATH="/src/python:${PYTHONPATH}"
+ENV PATH=$PATH:.
+RUN sed -i /etc/vim/vimrc.tiny -e 's/set compatible/set nocompatible/g'
+RUN echo "alias ll='ls -alh --color=auto'" >> /root/.bashrc
+RUN mkdir -p /wd /src/python/pm/model/predict/grpc/compiled /app/pm
+RUN ln -s /wd /app/pm/wd
+RUN ln -s /src /app/pm/src
+
+# Add container content
+ADD Container-Root/src/python/lib /src/python/lib
+ADD Container-Root/src/python/pm /src/python/pm
+ADD Container-Root/src/python/ui /src/python/ui
+ADD to /app/pm/to
+COPY Container-Root/src/python/technique/model_serve_grpc/model_interface.proto /src/python/pm/model/predict/grpc/model_interface.proto
+COPY Container-Root/src/python/technique/model_serve_grpc/*.proto /src/python/technique/model_serve_grpc/
+COPY *.sh .env .fun .fun2 .fun3 pm ev-* /app/pm/
+COPY Container-Root/startup.sh /startup.sh
+COPY Container-Root/init.sh /init.sh
+COPY Container-Root/test*.sh /
+COPY Container-Root/src/python/example/ev/technique/ev_data_select/technique_registration_ev_data_select.json /src/python/example/ev/technique/ev_data_select/technique_registration_ev_data_select.json
+COPY Container-Root/src/python/example/ev/ev_fleet_demo*.* /src/python/example/ev/
+
+# Run install scripts
+ADD install /install
+# Install AWS cli
+RUN /install/install-aws-cli.sh
+# Install grpcurl
+RUN /install/install-grpcurl.sh
+# Install Docker
+RUN /install/install-docker.sh
+# Install Docker Compose
+RUN /install/install-docker-compose.sh
+# Install kubectl
+RUN /install/install-kubectl.sh
+# Install kubectx
+RUN /install/install-kubectx.sh
+# Install and configure kubeps1
+RUN /install/install-kubeps1.sh
+# Install kubetail
+RUN /install/install-kubetail.sh
+# Install kubeshell
+RUN /install/install-kubeshell.sh
+
+# Install Python Libraries
+RUN pip install --upgrade pip
+RUN pip install -r /src/python/pm/requirements.txt -U
+
+# Compile Protobuf object
+RUN python3 -m grpc_tools.protoc -I. --proto_path=/src/python/pm/model/predict/grpc --python_out=/src/python/pm/model/predict/grpc/compiled --grpc_python_out=/src/python/pm/model/predict/grpc/compiled model_interface.proto
+
+# Set work directory
+# We use symbolic links wd and pm inside /aws/pm to emulate the external project structure
+WORKDIR /app/pm
+
+# Default cmd
+CMD ["/startup.sh"]

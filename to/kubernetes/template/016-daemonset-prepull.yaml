@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prepull-${IMAGE_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    matchLabels:
+      name: prepull-${IMAGE_NAME}
+  template:
+    metadata:
+      labels:
+        name: prepull-${IMAGE_NAME} 
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      initContainers:
+      - name: prepull-platform 
+        image: ${REGISTRY}${IMAGE_NAME}-platform${TAG}
+        command: ["bash","-c","echo pre-pulled ${REGISTRY}${IMAGE_NAME}-platform${TAG}"]
+      - name: prepull-model-build-ann 
+        image: ${REGISTRY}${IMAGE_NAME}-model_build_ann${TAG}
+        command: ["bash", "-c", "echo pre-pulled ${REGISTRY}${IMAGE_NAME}-model_build_ann${TAG}"]
+      - name: prepull-model-serve-grpc 
+        image: ${REGISTRY}${IMAGE_NAME}-model_serve_grpc${TAG}
+        command: ["bash", "-c", "echo pre-pulled ${REGISTRY}${IMAGE_NAME}-model_serve_grpc${TAG}"]
+      - name: prepull-model-predict-grpc 
+        image: ${REGISTRY}${IMAGE_NAME}-model_predict_grpc${TAG}
+        command: ["bash", "-c", "echo pre-pulled ${REGISTRY}${IMAGE_NAME}-model_predict_grpc${TAG}"]
+      - name: prepull-model-update-ukf-grpc 
+        image: ${REGISTRY}${IMAGE_NAME}-model_update_ukf_grpc${TAG}
+        command: ["bash", "-c", "echo pre-pulled ${REGISTRY}${IMAGE_NAME}-model_update_ukf_grpc${TAG}"]
+      containers:
+      - name: pause
+        image: gcr.io/google_containers/pause

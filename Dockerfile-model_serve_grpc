@@ -1,0 +1,37 @@
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+
+# Install tools and libraries
+RUN apt-get update -y && \
+    apt-get install -y gcc g++ gfortran nano vim-tiny curl net-tools unzip dnsutils iputils-ping
+
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -f awscliv2.zip && \
+    rm -rf ./aws
+
+# Install grpcurl
+RUN curl -L -o grpcurl.tar.gz https://github.com/fullstorydev/grpcurl/releases/download/v1.8.5/grpcurl_1.8.5_linux_x86_64.tar.gz && \
+    gunzip ./grpcurl.tar.gz && \
+    tar xvf grpcurl.tar && \
+    mv ./grpcurl /usr/local/bin && \
+    mv LICENSE /usr/local/bin/grpcurl-LICENSE && \
+    rm -rf grpcurl.tar
+
+# Configure container
+ENV PYTHONPATH="/src/python:/app:${PYTHONPATH}"
+RUN sed -i /etc/vim/vimrc.tiny -e 's/set compatible/set nocompatible/g'
+RUN echo "alias ll='ls -alh --color=auto'" >> /root/.bashrc
+RUN mkdir -p /wd /app/model /app/grpc_compiled
+WORKDIR /
+
+# Add content and install Python packages
+RUN pip install --upgrade pip
+ADD Container-Root/src/python/technique/model_serve_grpc/ /src/python/technique/model_serve_grpc
+ADD Container-Root/src/python/lib/ /src/python/lib
+RUN pip install -r /src/python/technique/model_serve_grpc/requirements.txt -U
+
+# Compile the Protobuf object
+COPY Container-Root/src/python/technique/model_serve_grpc/model_interface.proto /app/model_interface.proto
+RUN python3 -m grpc_tools.protoc -I. --proto_path=/app --python_out=/app/grpc_compiled --grpc_python_out=/app/grpc_compiled model_interface.proto

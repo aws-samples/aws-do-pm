@@ -1,0 +1,54 @@
+{
+  "task_id": "<newid1>",
+  "created_dt": "<timestamp>",
+  "updated_dt": "",
+  "task_name": "update",
+  "technique_name": "model_update_ukf_grpc",
+  "task_options": ["-it","--rm"],
+  "node_name": "update",
+  "dataLocation": "",
+  "infraSettings": {},
+  "analyticSettings": {
+    "rel_data_path": "data/<data_id>",
+    "rel_model_path": "model/<model_id>",
+    "rel_service_path": "service/<service_id>",
+    "rel_dest_path": "model/<newid2>",
+    "model": "Dict Object",
+    "num_output_points": 50,
+    "num_ukf_iter": 40,
+    "ukf": {
+      "alpha": [
+        1
+      ],
+      "beta": [
+        2
+      ],
+      "kappa": [
+        0
+      ],
+      "P": [
+        0.0001
+      ],
+      "Q": [
+        0.0001
+      ],
+      "R": [
+        0.0001
+      ]
+    }
+  },
+  "input_artifacts": {
+    "data": ["<data_id>"],
+    "model": ["<model_id>"],
+    "service": ["<service_id>"]
+  },
+  "output_artifacts": {
+    "model": ["<newid2>"]
+  },
+  "inputs": {
+  },
+  "outputs": {
+  },
+  "savedState": {
+  }
+}

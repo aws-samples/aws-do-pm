@@ -1,0 +1,10 @@
+{
+  "common": {
+    "region_name": "us-west-2",
+    "account": xxxxxxxxxxxx
+  },
+  "dynamodb": {
+    "model_table": "model_table",
+    "n_hash_char": 16
+  }
+}

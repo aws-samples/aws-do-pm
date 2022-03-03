@@ -1,0 +1,6 @@
+{
+    "technique_name": "technique_registration_graphdb",
+    "analyticSettings": {
+        "config": "/src/python/example/ev/technique/ev_data_select/technique_registration_ev_data_select.json"
+    }
+}

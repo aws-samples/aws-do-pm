@@ -1,0 +1,410 @@
+#!/bin/bash
+
+######################################################################
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. #
+# SPDX-License-Identifier: MIT-0                                     #
+######################################################################
+
+############################################################################################
+# EV Demo Description:
+# --------------------------
+# This script demonstrates an application of the aws-do-pm framework for a single electric vehicle (EV).
+# A a configured number of electric vehicles, each driving a specified number of routes is simulated
+# through generation of vehicle, route, and battery data using an emperical model.
+# A generic neural network model is then trained with a dataset combined from all initial routes.
+# A single vehicle is selected randomly. The model is then updated for the
+# specific vehicle by using data from the next route, creating a digital twin that is tuned for the selected asset.
+# Model sensitivity analysis is performed to assess the parameter interactions.
+# The configured number of predictions are also made for the modeled vehicle, assessing the error and updating the model if necessary.
+# The demo also shows the capability of aws-do-pm to serve a model as a gRPC service, implicitly or explicitly.
+############################################################################################
+
+
+############################################################################################
+# CONFIGURATION:
+
+# Import system settings
+source .env
+# Enable QUIET mode to allow command output parsing
+export QUIET=true
+
+# Number of vehicles and routes to generate. Only one vehicle will be randomly selected for the demo.
+export NUM_VEHICLES=10
+export NUM_ROUTES=10
+
+# Number of routes to predict. Route 0 is used for training, route 1 is used for update, predictions start from route 2.
+# NUM_PREDICTED_ROUTES<=NUM_ROUTES-2
+export NUM_PREDICTED_ROUTES=3
+
+# Model update threshold. If the prediction error is greater than this value, the model for the current vehicle will be udpated.
+export MODEL_UPDATE_THRESHOLD=0.05
+
+############################################################################################
+
+
+############################################################################################
+# Functions:
+
+function clear_system(){
+	# Erase all data, delete storage bucket, local work directory, remove graph
+	echo ""
+	echo "================================================================================="
+	echo "          Clearing system ..."
+	echo "================================================================================="
+	echo ""
+
+	./pm system clear
+}
+
+function initialize_system(){
+	# Create storage bucket and local work directory, creates graph,
+	# register system techniques
+	echo ""
+	echo "================================================================================="
+	echo "          Initializing system ..."
+	echo "================================================================================="
+	echo ""
+
+	./pm system init
+}
+
+function generate_ev_data(){
+	# Generate raw data for fleet of $NV number of vehicles and $NR routes each
+        # and save it in directory $DP
+
+	DP=$1
+	NV=$2
+	NR=$3
+
+	if [ -d $DP ]; then
+		echo ""
+		echo "Generated data found in path $DP"
+		echo "Skipping data generation"
+		echo ""
+	else
+		echo ""
+		echo "================================================================================="
+		echo "       Generating Electric Vehicle data for $NV vehicles, $NR routes each ..."
+		echo "================================================================================="
+		echo ""
+		echo "Number of electrical vehicles: ${NUM_VEHICLES}"
+		echo "Number of routes per vehicle: ${NUM_ROUTES}"
+		echo ""
+
+		# Login to Docker registry if needed
+		./login.sh
+
+		CMD="docker run -it --rm -v ${PROJECT_HOME}/wd:/wd -e NUM_VEHICLES=$NV -e NUM_ROUTES=$NR -e DEST_PATH=$DP ${REGISTRY}aws-do-pm-ev_datagen_em${TAG} /bin/bash -c /src/python/example/ev/task/ev_data_generate.sh"
+		if [ "${VERBOSE}" == "true" ]; then
+    			echo "${CMD}"
+		fi
+		eval "${CMD}"
+	fi
+}
+
+function register_raw_dataset(){
+	# Upload and register raw EV dataset in aws-do-pm system
+	# Read data from folder $DP, include information about
+	# number of vehicles $NV and number of routes $NR in metadata
+
+	DP=$1
+	NV=$2
+	NR=$3
+
+	echo ""
+	echo "================================================================================="
+	echo "          Registering raw data set ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm data register wd/generated_ev_data overall_pd.csv "Generated raw EV data set for a fleet of ${NV} vehicles and ${NR} routes each")
+	echo "$OUTPUT"
+	RAW_EV_DATA_ID_OUT=$(echo "$OUTPUT" | grep data | grep -v load | grep -v path | grep -v python | grep -v task)
+	RAW_EV_DATA_ID=$(echo $RAW_EV_DATA_ID_OUT | tr -d '\r' | cut -d '/' -f 2)
+	echo "RAW_EV_DATA_ID=$RAW_EV_DATA_ID"
+}
+
+function register_training_dataset(){
+	# Upload and register model training dataset in aws-do-pm system
+	# Read dataset from local folder $DP
+
+	DP=$1
+
+	echo ""
+	echo "================================================================================="
+	echo "          Registering data for model training ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm data register $DP input_output.json "Generated EV data for model training")
+	echo "$OUTPUT"
+	TRAIN_DATA_ID_RAW=$(echo "$OUTPUT" | grep data\/ | grep -v load | grep -v path | grep -v python)
+	TRAIN_DATA_ID=$(echo $TRAIN_DATA_ID_RAW | tr -d '\r' | cut -d '/' -f 2)
+	echo "TRAIN_DATA_ID=$TRAIN_DATA_ID"
+}
+
+function build_model(){
+	# Build EV battery degradation model using Artificial Neural Network modeling technique
+	# Use specified data ID $DID
+
+	DID=$1
+
+	echo ""
+	echo "================================================================================="
+	echo "   Building Neural Network model using DATA_ID $DID ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm model build $DID)
+	echo "$OUTPUT"
+	MODEL_ID_RAW=$(echo "$OUTPUT" | grep model\/ | grep -v nitializing | grep -v ported | grep -v sync | grep -v upload)
+	echo "MODEL_ID_RAW=$MODEL_ID_RAW"
+	MODEL_ID=$(echo $MODEL_ID_RAW | tr -d '\r' | cut -d '/' -f 2)
+	echo "MODEL_ID=$MODEL_ID"
+}
+
+function register_custom_technique(){
+	# Register EV data selection technique
+	# This is a custom technique which extracts data for a particular electric vehicle and route
+	# and saves it as a new dataset in the aws-do-pm system
+	echo ""
+	echo "================================================================================="
+	echo "          Registering custom technique for EV data selection  ..."
+	echo "================================================================================="
+	echo ""
+	./cp-to.sh platform 1 src/python/example/ev/technique/ev_data_select/technique_registration_ev_data_select.json /tmp/technique_registration_ev_data_select.json
+	echo "{ \"technique_name\": \"technique_registration_graphdb\", \"analyticSettings\": { \"config\": \"/tmp/technique_registration_ev_data_select.json\" } }" > ${PM_ROOT_PATH}/tmp/task_register_technique_ev_data_select.json
+	./pm do ${PM_ROOT_PATH}/tmp/task_register_technique_ev_data_select.json
+}
+
+function select_data(){
+	# Use EV data selection technique to extract data for vehicle id $VID, route id $RID
+	# from raw data set $RDID and save it as a new dataset in the aws-do-pm system
+
+	RDID=$1
+	VID=$2
+	RID=$3
+
+	echo ""
+	echo "================================================================================="
+	echo "  Selecting new data for vehicle # $VID, route # $RID ..."
+	echo "================================================================================="
+	echo ""
+
+	./pm go select ev data | sed -e "s/<data_id>/${RDID}/g" -e "s/<vehicle_id>/${VID}/g" -e "s/<route_id>/${RID}/g" > ${PM_ROOT_PATH}/tmp/task_ev_data_select.json
+	OUTPUT=$(./pm do ${PM_ROOT_PATH}/tmp/task_ev_data_select\.json)
+	echo "$OUTPUT"
+	NEW_DATA_ID_OUT=$(echo "$OUTPUT" | grep data\/ | grep -v load | grep -v path | grep -v port | grep -v task)
+	NEW_DATA_ID=$(echo $NEW_DATA_ID_OUT | tr -d '\r' | cut -d '/' -f 2)
+	echo "NEW_DATA_ID=$NEW_DATA_ID"
+}
+
+function update_model(){
+	# Update model id $MID using the UKF technique and data $DID
+
+	MID=$1
+	DID=$2
+
+	echo ""
+	echo "================================================================================="
+	echo "  Updating model $MID using data $DID ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm model update $MID $DID)
+	echo "$OUTPUT"
+
+	UPDATED_MODEL_ID_RAW=$(echo "$OUTPUT" | grep Exported | grep model\/ | grep -v metadata)
+	UPDATED_MODEL_ID=$(echo $UPDATED_MODEL_ID_RAW | cut -d '/' -f 3 | tr -d '\r')
+	echo "UPDATED_MODEL_ID=$UPDATED_MODEL_ID"
+}
+
+function deploy_model_service(){
+	# Start gRPC model service for model $MID
+
+	MID=$1
+
+	echo ""
+	echo "================================================================================="
+	echo "       Deploying model $MID as a gRPC service ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm service deploy ${MID})
+	echo "$OUTPUT"
+	SERVICE_ID_RAW=$(echo "$OUTPUT" | grep SERVICE_ID)
+	echo "SERVICE_ID_RAW=$SERVICE_ID_RAW"
+	SERVICE_ID=$(echo "$SERVICE_ID_RAW" | cut -d '=' -f 2 | tr -d '\r')
+	echo "SERVICE_ID=$SERVICE_ID"
+}
+
+function predict(){
+	# Generate a predicted dataset using the specified model service $SID and data $DID
+
+	SID=$1
+	DID=$2
+
+	echo ""
+	echo "================================================================================="
+	echo "  Predicting with model service $SID and data $DID ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm model predict $SID $DID)
+	echo "$OUTPUT"
+	PREDICTED_DATA_ID_RAW=$(echo "$OUTPUT" | grep data | grep -v s3 | grep -v kubectl | grep -v ported | grep -v task)
+	PREDICTED_DATA_ID=$(echo "$PREDICTED_DATA_ID_RAW" | cut -d '/' -f 2 | tr -d '\r')
+	echo "PREDICTED_DATA_ID=$PREDICTED_DATA_ID"
+	PREDICTION_ERROR=$(./pm data describe ${PREDICTED_DATA_ID} | jq -r .mae_overall)
+	echo "PREDICTION_ERROR=$PREDICTION_ERROR"
+}
+
+function analyze_model_sensitivity(){
+	# Analyze model sensitivity using the specified model id $MID and data $DID
+
+	MID=$1
+	DID=$2
+
+	echo ""
+	echo "================================================================================="
+	echo " Analyzing model sensitivity using model $MID and data $DID ..."
+	echo "================================================================================="
+	echo ""
+
+	./pm model sensitivity $MID $DID
+}
+
+function destroy_model_service(){
+	# Shutdown and remove the specified model service $SID
+
+	SID=$1
+
+	echo ""
+	echo "================================================================================="
+	echo "         Destroying gRPC service $SID ..."
+	echo "================================================================================="
+	echo ""
+
+	OUTPUT=$(./pm service destroy ${SID})
+	echo "$OUTPUT"
+}
+
+function demo_start(){
+	# Display demo start message
+	echo ""
+	echo "================================================================================="
+	echo "                          Executing EV demo "
+	echo "                  for a single vehicle, randomly selected from "
+	echo "                  a fleet of $NUM_VEHICLES electric vehicles "
+	echo "                       driving $NUM_ROUTES routes each "
+	echo "================================================================================="
+	echo ""
+	
+	TIMESTAMP_START=$(date +%Y%m%d-%H%M%S)
+	TIME_START=$(date +%s)
+	echo ""
+	echo "Launch time: ${TIMESTAMP_START}"
+	echo ""
+}
+
+function demo_end(){
+	# Display demo completed message
+	echo ""
+	echo "================================================================================="
+	echo "                          EV demo completed. "
+	echo "    Browse model and data results at http://${PM_UI_HOST_EXT}:${PM_UI_PORT_EXT}"
+	echo "    See resulting graph at http://${PM_GRAPHDB_HOST_EXT}:${PM_GRAPHDB_PORT_EXT}"
+	echo "================================================================================="
+	echo ""
+	
+	TIMESTAMP_END=$(date +%Y%m%d-%H%M%S)
+	TIME_END=$(date +%s)
+
+	stty sane
+	echo ""
+	echo "Launch end time: ${TIMESTAMP_END}"
+	echo ""
+	echo "Total elapsed time: $(( (${TIME_END} - ${TIME_START})/60 )) minutes"
+	echo ""
+}
+
+
+############################################################################################
+# Demo:
+
+# Print start headers
+demo_start
+
+# Delete any existing data and graphs
+clear_system
+
+# Create storage and initialize graph
+initialize_system
+
+# Generate raw data for configured number of vehicles and routes
+generate_ev_data wd/generated_ev_data $NUM_VEHICLES $NUM_ROUTES
+
+# Import and register raw dataset in system
+register_raw_dataset wd/generated_ev_data $NUM_VEHICLES $NUM_ROUTES
+
+# Import and register training data
+register_training_dataset wd/generated_ev_data/train_data
+
+# Train neural network using route 0 from all vehicles
+build_model $TRAIN_DATA_ID
+
+# Register a user-defined technique for selection of vehicle and route from the raw dataset
+register_custom_technique
+
+# Randomly select a vehicle id and route number
+UPDATE_VEHICLE_ID=$(seq 0 $((NUM_VEHICLES-1)) | sort -R | head -n 1)
+UPDATE_ROUTE_ID=1
+
+# Select data for the randomly selected vehicle id and route number using the custom technique
+select_data $RAW_EV_DATA_ID $UPDATE_VEHICLE_ID $UPDATE_ROUTE_ID
+
+# Update the generic neural network model with the data from the selected vehicle
+# This method will automatically deploy the model as a service to perform the update
+# and destroy the service when the update is completed
+update_model $MODEL_ID $NEW_DATA_ID
+
+# Analyze sensitivity of the model to changes of the model inputs
+# This method will also automatically deploy the model as a service to perform the analysis
+# and destroy the service when the analysis is completed
+analyze_model_sensitivity $UPDATED_MODEL_ID $NEW_DATA_ID
+
+# Explicitly deploy the model as a service to perform the specified number of predictions
+deploy_model_service $UPDATED_MODEL_ID
+echo "SERVICE_ID=$SERVICE_ID"
+
+# Predict the next routes and update the model when the prediction error exceeds the threshold
+r=2
+pr=0
+SELECTED_VEHICLE=$UPDATE_VEHICLE_ID
+while [ $pr -lt $NUM_PREDICTED_ROUTES ]; do
+	route=$((r+pr))
+	if [ $route -lt $NUM_ROUTES ]; then
+		echo ""
+		echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+		echo "   Predicting route $route for vehicle ${SELECTED_VEHICLE} ..."
+			select_data $RAW_EV_DATA_ID ${SELECTED_VEHICLE} $route
+			SERVICE_ID_V=${SERVICE_ID}
+			predict ${SERVICE_ID_V} ${NEW_DATA_ID}
+			if (( $(echo "$PREDICTION_ERROR $MODEL_UPDATE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
+				echo ""
+				echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+					echo "   Updating model for vehicle for vehicle ${SELECTED_VEHICLE} ..."
+					echo "Using service id ${SERVICE_ID_V}"
+					update_model ${SERVICE_ID_V} ${NEW_DATA_ID}
+					echo "Configuring service id ${SERVICE_ID_V} with model ${UPDATED_MODEL_ID}"
+					./pm service configure ${SERVICE_ID_V} ${UPDATED_MODEL_ID}
+			fi
+	fi
+	pr=$((pr+1))
+done
+
+# Destroy the model service explicitly
+destroy_model_service $SERVICE_ID
+
+# Print footnotes
+demo_end

@@ -1,0 +1,22 @@
+{
+    "task_id": "<newid1>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "node_name": "",
+    "task_name": "",
+    "technique_name": "",
+    "target_orchestrator": "",
+    "task_options": [],
+    "container_image": "",
+    "executor_filepath": "",
+    "analyticSettings": {
+    },
+    "inputs": {
+    },
+    "outputs":{
+    },
+    "input_artifacts": {},
+    "output_artifacts": {},
+    "savedState": {},
+    "status": ""
+}

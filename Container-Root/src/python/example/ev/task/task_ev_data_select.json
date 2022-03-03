@@ -1,0 +1,10 @@
+{
+    "technique_name": "ev_data_select",
+    "analyticSettings": {
+        "rel_src_path": "data/<id>",
+        "filter_condition": {"vehicle_id": "V2", "route_id": 5}
+    },
+    "input_artifacts": {
+        "data": ["<id>"]
+    }
+}

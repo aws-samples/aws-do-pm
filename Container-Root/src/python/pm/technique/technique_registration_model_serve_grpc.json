@@ -1,0 +1,40 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": ["model","serve","grpc","service","deploy"],
+    "technique_name": "model_serve_grpc",
+    "technique_description": "Serve a model as a gRPC service",
+    "node_name": "model_serve_grpc",
+    "task_target_orchestrator": "docker",
+    "task_container_image": "aws-do-pm-model_serve_grpc:latest",
+    "task_executor_filepath": "/src/python/technique/model_serve_grpc/model_server_startup.py",
+    "task_template": {
+        "task_id": "<newid1>",
+        "created_dt": "<timestamp>",
+        "updated_dt": "",
+        "node_name": "deploy",
+        "task_name": "deploy",
+        "technique_name": "model_serve_grpc",
+        "task_options": ["-d","--restart=Always","--hostname service-<newid2>","--name service-<newid2>"],
+        "processor": "cpu",
+        "target_orchestrator": "",
+        "container_image": "",
+        "executor_filepath": "",
+        "analyticSettings": {
+            "group_id": "<group_id>",
+            "internal_port": 13000,
+            "rel_model_path": "model/<model_id>",
+            "processor": "cpu",
+            "startup_timeout_sec": 60 
+        },
+        "inputs": {
+        },
+        "outputs":{
+        },
+        "input_artifacts": {"model": ["<model_id>"]},
+        "output_artifacts": {"service": ["<newid2>"]},
+        "savedState": {},
+        "status": ""
+    }
+}

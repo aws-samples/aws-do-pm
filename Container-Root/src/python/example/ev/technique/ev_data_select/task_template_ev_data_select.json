@@ -1,0 +1,35 @@
+{
+    "task_id": "<newid1>",
+    "task_name": "ev_data_select",
+    "technique_name": "ev_data_select",
+    "dataLocation": "",
+    "modelLocation": "",
+    "infraSettings": {
+        "gpus": "",
+        "cpus": "",
+        "memory":"",
+        "budget":"",
+        "vpc":"",
+        "region":"",
+        "credentials":"",
+        "serverless":""
+    },
+    "analyticSettings": {
+        "rel_src_path": "data/<id>",
+        "rel_dest_path": "data/<newid2>",
+        "filter_condition": {"vehicle_id": "V2", "route_id": 5}
+    },
+    "inputs": {
+    },
+    "outputs":
+    {
+    },
+    "input_artifacts": {
+        "data": ["<id>"]
+    },
+    "output_artifacts": {
+        "data": ["<newid2>"]
+    },
+    "savedState": {},
+    "status": ""
+}

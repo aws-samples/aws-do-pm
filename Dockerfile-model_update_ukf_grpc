@@ -1,0 +1,31 @@
+FROM python:3.9.0
+
+# Install common tools
+RUN apt-get update -y && \
+    apt-get install -y nano vim-tiny less curl unzip
+
+# Add container content
+ADD Container-Root/src/python/technique/model_update_ukf_grpc /src/python/technique/model_update_ukf_grpc
+ADD Container-Root/src/python/lib /src/python/lib
+COPY Container-Root/src/python/technique/model_serve_grpc/torch_client.py /src/python/technique/model_serve_grpc/torch_client.py
+
+# Install Python Libraries
+RUN pip install --upgrade pip
+RUN pip install -r /src/python/technique/model_update_ukf_grpc/requirements.txt -U
+
+# Configure container
+ENV PYTHONPATH="/src/python:/app:${PYTHONPATH}"
+RUN sed -i /etc/vim/vimrc.tiny -e 's/set compatible/set nocompatible/g'
+RUN echo "alias ll='ls -alh --color=auto'" >> /root/.bashrc
+RUN mkdir -p /wd /app/grpc_compiled
+
+ENV PYDEVD_WARN_EVALUATION_TIMEOUT=36000
+
+# Compile the Protobuf object
+COPY Container-Root/src/python/technique/model_serve_grpc/model_interface.proto /app/model_interface.proto
+RUN python3 -m grpc_tools.protoc -I. --proto_path=/app --python_out=/app/grpc_compiled --grpc_python_out=/app/grpc_compiled model_interface.proto
+
+
+# Set work directory
+# Set this to the parent of wd or create a symbolic link to wd from the container work dir
+WORKDIR /

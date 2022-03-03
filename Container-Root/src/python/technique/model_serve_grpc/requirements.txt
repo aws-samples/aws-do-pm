@@ -1,0 +1,11 @@
+pandas
+numpy
+fmpy
+tqdm
+grpcio
+protobuf
+grpcio-tools
+grpcio-health-checking
+debugpy
+argparse
+smt

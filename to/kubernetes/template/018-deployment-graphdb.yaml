@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: graphdb
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+    spec:
+      #nodeSelector:
+      #  beta.kubernetes.io/instance-type: "${INSTANCE_TYPE}"      initContainers:
+      initContainers:
+      - name: init-pvc
+        image: busybox:1.35.0
+        command: ['sh', '-c', "if [ ! -d /efs/wd/graphdb ]; then echo 'Creating directory /efs/wd/graphdb'; mkdir -p /efs/wd/graphdb; else echo 'Directory /efs/wd/graphdb already exists'; fi"]
+        volumeMounts:
+        - name: efs
+          mountPath: /efs
+      containers:
+      - name: main
+        image: "arangodb:latest"
+        imagePullPolicy: Always
+        env:
+        - name: ARANGO_ROOT_PASSWORD
+          value: "${PM_GRAPHDB_SYSTEM_CR}"
+        ports:
+        - name: graphdb-int
+          containerPort: ${PM_GRAPHDB_PORT_INT}
+        volumeMounts:
+        - name: wd-graphdb
+          mountPath: /var/lib/arangodb3
+      volumes:
+      - name: efs
+        persistentVolumeClaim:
+          claimName: pm-efs-pvc
+      - name: wd-graphdb
+        persistentVolumeClaim:
+          claimName: pm-efs-graphdb-pvc
+          
+        #resources:
+        #  limits:
+        #    cpu: 4
+        #    memory: 4Gi
+        #    nvidia.com/gpu: 1
+        #    k8s.amazonaws.com/vgpu: 5
+        #  requests:
+        #    cpu: "1"
+        #    memory: 1Gi   

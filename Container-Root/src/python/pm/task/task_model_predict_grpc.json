@@ -1,0 +1,15 @@
+{
+  "technique_name": "model_predict_grpc",
+  "task_options": ["-it","--rm"],
+  "analyticSettings": {
+    "rel_data_path": "data/<id1>",
+    "rel_model_path": "model/<id2>",
+    "rel_service_path": "service/<id3>",
+    "num_samples": 100
+  },
+  "input_artifacts": {
+    "data": ["<id1>"],
+    "model": ["<id2>"],
+    "service": ["<id3>"]
+  }
+}

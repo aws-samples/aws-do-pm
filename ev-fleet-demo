@@ -1,0 +1,64 @@
+#!/bin/bash
+
+######################################################################
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved. #
+# SPDX-License-Identifier: MIT-0                                     #
+######################################################################
+
+############################################################################################
+# EV Fleet Demo Description:
+# --------------------------
+# This script demonstrates an application of the aws-do-pm framework for a fleet of Electric Vehicles.
+# A a configured number of electric vehicles, each driving a specified number of routes is simulated
+# through generation of vehicle, route, and battery data using an emperical model.
+# A generic neural network model is then trained with a dataset combined from all initial routes.
+# Each next vehicle route is predicted by the model. When actual data becomes available,
+# the prediction error is calculated and if it is above a configured threshold, the model
+# for that vehicle is updated before a prediction for the following route is made.
+# This workflow is applied in parallel for each vehicle, in effect creating a digital twin
+# which is always up-to-date and provides a prediction for the upcoming route for a 
+# fleet of electric vehicles.
+# This demo has a route first approach. A model service is deployed for each vehicle.
+# When the vehicle model needs to be updated, the current service is destroyed, and the updated
+# model is deployed as the new model service. 
+############################################################################################
+
+
+
+source .env
+export QUIET=true
+export PYTHONPATH=${PROJECT_HOME}/src/python
+stty sane
+
+NUM_PLATFORM_CONTAINERS=$(./status.sh | grep platform | wc -l)
+
+echo ""
+echo "============================================================="
+echo "    Launching $NUM_PLATFORM_CONTAINERS groups"
+echo "============================================================="
+echo ""
+
+TIMESTAMP_START=$(date +%Y%m%d-%H%M%S)
+TIME_START=$(date +%s)
+echo ""
+echo "Launch time: ${TIMESTAMP_START}"
+echo ""
+
+python src/python/example/ev/ev_fleet_demo_init.py --config src/python/example/ev/ev_fleet_demo.json
+
+./cp-to.sh platform 1 src/python/example/ev/ev_fleet_demo.json ${PM_ROOT_PATH}/tmp/ev_fleet_demo.json
+
+python src/python/example/ev/ev_fleet_demo_launch.py --config ${PM_ROOT_PATH}/tmp/ev_fleet_demo.json --groups $NUM_PLATFORM_CONTAINERS
+
+
+TIMESTAMP_END=$(date +%Y%m%d-%H%M%S)
+TIME_END=$(date +%s)
+
+stty sane
+echo ""
+echo "Launch end time: ${TIMESTAMP_END}"
+echo ""
+echo "Total elapsed time: $(( (${TIME_END} - ${TIME_START})/60 )) minutes"
+echo ""
+echo "Total number of groups: $NUM_PLATFORM_CONTAINERS"
+echo ""

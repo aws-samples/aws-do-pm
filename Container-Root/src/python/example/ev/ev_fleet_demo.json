@@ -1,0 +1,8 @@
+{
+    "data_path": "wd/generated_ev_data",
+    "num_vehicles": 10,
+    "num_routes": 10,
+    "num_predicted_routes": 1,
+    "model_update_threshold": 0.05,
+    "max_concurrent_tasks": 0
+}

@@ -1,0 +1,6 @@
+{
+    "technique_name": "technique_registration_graphdb",
+    "analyticSettings": {
+        "config": "/src/python/pm/technique/technique_registration_model_update_ukf_grpc.json"
+    }
+}

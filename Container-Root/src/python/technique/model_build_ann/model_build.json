@@ -1,0 +1,44 @@
+{
+    "task_id": "<newid1>",
+    "task": "model_build",
+    "technique": "user-defined",
+    "dataLocation": "",
+    "modelLocation": "",
+    "infraSettings": {
+        "gpus": "",
+        "cpus": "",
+        "memory":"",
+        "budget":"",
+        "vpc":"",
+        "region":"",
+        "credentials":"",
+        "serverless":""
+    },
+    "analyticSettings": {
+        "rel_src_path": "data/<id>",
+        "rel_dest_path": "model/<newid2>",
+        "neuron_list": [4, 8, 16, 8, 4],
+        "input_var_order": ["trip_vel", "trip_dist", "trip_load"],
+        "output_var_order": ["trip_v"],
+        "train_size": 0.8,
+        "max_epoch": 2000,
+        "lr": 0.001,
+        "dropout": 1E-6,
+        "gpu_mode": true,
+        "layer_name": "final",
+        "range_percent": 20
+    },
+    "inputs": {
+    },
+    "outputs":
+    {
+    },
+    "input_artifacts": {
+        "data": ["<id>"]
+    },
+    "output_artifacts": {
+        "model": ["<newid2>"]
+    },
+    "savedState": {},
+    "status": ""
+}

@@ -1,0 +1,36 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": ["model","service","destroy"],
+    "technique_name": "model_service_destroy",
+    "technique_description": "Stop and remove a model service",
+    "node_name": "model_service_destroy",
+    "task_target_orchestrator": "python",
+    "task_container_image": "aws-do-pm-platform:latest",
+    "task_executor_filepath": "/src/python/pm/service/service_destroy.py",
+    "task_template": 
+    {
+        "task_id": "<newid1>",
+        "created_dt": "<timestamp>",
+        "updated_dt": "",
+        "node_name": "destroy",
+        "task_name": "destroy",
+        "technique_name": "model_service_destroy",
+        "target_orchestrator": "python",
+        "task_options": ["-it","--rm","--restart=Never"],
+        "processor": "cpu",
+        "container_image": "aws-do-pm-platform:latest",
+        "executor_filepath": "/src/python/pm/service/service_destroy.py",
+        "analyticSettings": {
+        },
+        "inputs": {
+        },
+        "outputs":{
+        },
+        "input_artifacts": {"service": ["<service_id>"]},
+        "output_artifacts": {"trash": ["<newid2>"]},
+        "savedState": {},
+        "status": ""
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "task_id": "<newid1>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "node_name": "configure",
+    "task_name": "configure",
+    "technique_name": "model_service_configure",
+    "task_options": [""];
+    "analyticSettings": {
+        "rel_service_path": "service/<service_id>",
+        "rel_model_path": "model/<model_id>"
+    },
+    "inputs": {
+    },
+    "outputs":{
+    },
+    "input_artifacts": {"model": ["<model_id>"], "service":  ["<service_id>"]},
+    "output_artifacts": {"service": ["<service_id>"]},
+    "savedState": {},
+    "status": ""
+}

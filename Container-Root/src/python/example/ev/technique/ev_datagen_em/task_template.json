@@ -1,0 +1,17 @@
+{
+    "task_id": "<newid1>",
+    "task_name": "generate",
+    "technique_name": "ev_datagen_em",
+    "analyticSettings": {
+        "rel_dest_path": "data/<newid2>",
+        "n_vehicles": 10,
+        "n_routes": 100
+    },
+    "inputs": {
+    },
+    "outputs":
+    {
+    },
+    "savedState": {},
+    "status": ""
+}

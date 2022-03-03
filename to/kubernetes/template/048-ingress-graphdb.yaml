@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: graphdb
+  namespace: ${NAMESPACE}
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/tags: Environment=demo
+    alb.ingress.kubernetes.io/inbound-cidrs: ${ALB_ALLOW_CIDRS}
+    alb.ingress.kubernetes.io/success-codes: 301,200
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/*"
+        backend:
+          service:
+            name: graphdb
+            port:
+              number: ${PM_GRAPHDB_PORT_EXT}

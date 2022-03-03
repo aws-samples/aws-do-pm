@@ -1,0 +1,9 @@
+{
+    "technique_name": "ev_model_build_ann",
+    "analyticSettings": {
+        "rel_src_path": "data/<data_id>"
+    },
+    "input_artifacts": {
+        "data": ["<data_id>"]
+    }
+}

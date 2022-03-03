@@ -1,0 +1,62 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": ["model","build","ann"],
+    "technique_name": "model_build_ann",
+    "technique_description": "Build model using artificial neural network",
+    "node_name": "model_build_ann",
+    "task_target_orchestrator": "docker",
+    "task_container_image": "aws-do-pm-model_build_ann:latest",
+    "task_executor_filepath": "/src/python/technique/model_build_ann/train_torch_model.py",
+    "task_template": 
+    {
+        "task_id": "<newid1>",
+        "task_name": "build",
+        "technique_name": "model_build_ann",
+        "task_options": ["-it", "--rm","--restart=Never"],
+        "processor": "gpu",
+        "node_name": "build",
+        "created_dt": "<timestamp>",
+        "dataLocation": "",
+        "modelLocation": "",
+        "infraSettings": {
+            "gpus": "",
+            "cpus": "",
+            "memory":"",
+            "budget":"",
+            "vpc":"",
+            "region":"",
+            "credentials":"",
+            "serverless":""
+        },
+        "analyticSettings": {
+            "rel_src_path": "data/<data_id>",
+            "rel_dest_path": "model/<newid2>",
+            "filter_condition": {"route_id":  0},
+            "neuron_list": [4, 8, 16, 8, 4],
+            "input_var_order": ["trip_vel", "trip_dist", "trip_load"],
+            "output_var_order": ["trip_v"],
+            "train_size": 0.8,
+            "max_epoch": 2000,
+            "lr": 0.001,
+            "dropout": 1E-6,
+            "gpu_mode": true,
+            "layer_name": "final",
+            "range_percent": 20
+        },
+        "inputs": {
+        },
+        "outputs":
+        {
+        },
+        "input_artifacts": {
+            "data": ["<data_id>"]
+        },
+        "output_artifacts": {
+            "model": ["<newid2>"]
+        },
+        "savedState": {},
+        "status": ""
+    }
+}

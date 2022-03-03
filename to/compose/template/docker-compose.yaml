@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+
+    platform:
+        build:
+            context: ../../../
+            dockerfile: Dockerfile-platform
+        image: ${REGISTRY}${IMAGE_NAME}-platform${TAG}
+        environment:
+            - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+            - AWS_ENDPOINT=$AWS_ENDPOINT
+            - AWS_OPTS="$AWS_OPTS"
+            - PM_ID_LENGTH=$PM_ID_LENGTH
+            - PROJECT_HOME=${PROJECT_HOME}
+            - PM_ROOT_PATH=$PM_ROOT_PATH
+            - PM_GRAPHDB_URL=${PM_GRAPHDB_URL_INT}
+            - PM_GRAPHDB_SYSTEM_CR=$PM_GRAPHDB_SYSTEM_CR
+            - PM_GRAPHDB_NAME=$PM_GRAPHDB_NAME
+            - PM_GRAPHDB_ID=$PM_GRAPHDB_ID
+            - PM_GRAPHDB_CR=$PM_GRAPHDB_CR
+            - PM_GRAPHDB_GRAPH=$PM_GRAPHDB_GRAPH
+            - PROCESSOR=$PROCESSOR
+            - PM_UI_PORT_INT=$PM_UI_PORT_INT
+            - VOL_MAP=$VOL_MAP
+            - PORT_MAP=$PORT_MAP
+            - PM_S3_BUCKET=$PM_S3_BUCKET
+            - REGISTRY=$REGISTRY
+        ports:
+            - "5678:5678"
+        volumes:
+            - "${PROJECT_HOME}/wd:/wd"
+            - "${PROJECT_HOME}/Container-Root/src:/src"
+            - "${PROJECT_HOME}:/app/pm"
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        ${COMPOSE_GPU}
+        
+    ui:
+        image: ${REGISTRY}${IMAGE_NAME}-platform${TAG}
+        command: ['streamlit', 'run', '/src/python/ui/main_app.py', '--server.port', '${PM_UI_PORT_INT}']
+        environment:
+            - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+            - AWS_ENDPOINT=$AWS_ENDPOINT
+            - AWS_OPTS="$AWS_OPTS"
+            - PM_ID_LENGTH=$PM_ID_LENGTH
+            - PROJECT_HOME=${PROJECT_HOME}
+            - PM_ROOT_PATH=$PM_ROOT_PATH
+            - PM_GRAPHDB_URL=${PM_GRAPHDB_URL_INT}
+            - PM_GRAPHDB_SYSTEM_CR=$PM_GRAPHDB_SYSTEM_CR
+            - PM_GRAPHDB_NAME=$PM_GRAPHDB_NAME
+            - PM_GRAPHDB_ID=$PM_GRAPHDB_ID
+            - PM_GRAPHDB_CR=$PM_GRAPHDB_CR
+            - PM_GRAPHDB_GRAPH=$PM_GRAPHDB_GRAPH
+            - PROCESSOR=$PROCESSOR
+            - PM_UI_PORT_INT=$PM_UI_PORT_INT
+            - VOL_MAP=$VOL_MAP
+            - PORT_MAP=$PORT_MAP
+        ports:
+            - "${PM_UI_PORT_EXT}:${PM_UI_PORT_INT}"
+            - "5679:5679"
+        volumes:
+            - "${PROJECT_HOME}/wd:/wd"
+            - "${PROJECT_HOME}/Container-Root/src:/src"
+            - "${PROJECT_HOME}:/app/pm"
+#            - "/var/run/docker.sock:/var/run/docker.sock"
+
+    graphdb:
+        image: arangodb:latest
+        command: arangod --server.endpoint tcp://0.0.0.0:${PM_GRAPHDB_PORT_EXT}
+        environment:
+          - ARANGO_ROOT_PASSWORD=${PM_GRAPHDB_SYSTEM_CR}
+        volumes:
+          - ${PROJECT_HOME}/wd/graphdb:/var/lib/arangodb3
+        ports:
+          - "${PM_GRAPHDB_PORT_EXT}:${PM_GRAPHDB_PORT_INT}"
+    ${COMPOSE_AWS}

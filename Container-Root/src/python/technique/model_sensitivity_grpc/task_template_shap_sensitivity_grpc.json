@@ -1,0 +1,35 @@
+{
+  "task_id": "<newid1>",
+  "created_dt": "<timestamp>",
+  "updated_dt": "",
+  "task_name": "sensitivity",
+  "technique_name": "model_sensitivity_grpc",
+  "task_options": ["-it","--rm"],
+  "node_name": "analyze",
+  "dataLocation": "",
+  "infraSettings": {},
+  "analyticSettings": {
+    "rel_data_path": "data/<data_id>",
+    "rel_model_path": "model/<model_id>",
+    "rel_service_path": "service/<service_id>",
+    "rel_dest_path": "data/<newid2>",
+    "model": "Dict Object",
+    "percent_range": 20,
+    "num_samples": 200,
+    "num_background_samples": 50
+  },
+  "input_artifacts": {
+    "data": ["<data_id>"],
+    "model": ["<model_id>"],
+    "service": ["<service_id>"]
+  },
+  "output_artifacts": {
+    "data": ["<newid2>"]
+  },
+  "inputs": {
+  },
+  "outputs": {
+  },
+  "savedState": {
+  }
+}

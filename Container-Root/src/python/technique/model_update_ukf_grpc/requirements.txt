@@ -1,0 +1,17 @@
+pandas
+sys
+numpy
+Pandas
+tqdm
+scipy
+matplotlib
+seaborn
+joblib
+sklearn
+argparse
+grpcio
+protobuf
+grpcio-tools
+grpcio-health-checking
+nanoid
+debugpy

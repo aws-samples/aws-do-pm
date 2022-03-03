@@ -1,0 +1,17 @@
+aws:
+        image: localstack/localstack
+        ports:
+            - "4566:4566"
+            - "4571:4571"
+            - "${LOCALSTACK_PORT_WEB_UI-8080}:${LOCALSTACK_PORT_WEB_UI-8080}"
+        environment:
+            - SERVICES=${LOCALSTACK_SERVICES- }
+            - DEBUG=${LOCALSTACK_DEBUG- }
+            - DATA_DIR=${LOCALSTACK_DATA_DIR-/wd/aws}
+            - PORT_WEB_UI=${LOCALSTACK_PORT_WEB_UI- }
+            - LAMBDA_EXECUTOR=${LOCALSTACK_LAMBDA_EXECUTOR- }
+            - KINESIS_ERROR_PROBABILITY=${LOCALSTACK_KINESIS_ERROR_PROBABILITY- }
+            - DOCKER_HOST=unix:///var/run/docker.sock
+        volumes:
+            - "${TMPDIR:-/tmp/aws}:/tmp/localstack"
+            - "${PROJECT_HOME}/wd/aws:/wd/aws"

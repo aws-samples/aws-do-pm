@@ -1,0 +1,39 @@
+{
+    "technique_id": "<newid>",
+    "created_dt": "<timestamp>",
+    "updated_dt": "",
+    "technique_tags": ["model","register"],
+    "technique_name": "model_registration",
+    "technique_description": "Upload model and register it in the graph database",
+    "node_name": "model_registration",
+    "task_target_orchestrator": "docker",
+    "task_container_image": "aws-do-pm-platform:latest",
+    "task_executor_filepath": "/src/python/pm/model/task_executor_register_model.py",
+    "task_template": 
+    {
+        "task_id": "<newid1>",
+        "task_name": "register",
+        "technique_name": "model_registration",
+        "task_options": ["-it","--rm","-v","<path>:/register"],
+        "processor": "cpu",
+        "node_name": "register",
+        "created_dt": "<timestamp>",
+        "analyticSettings": {
+            "pm_s3_bucket": "aws-do-pm",
+            "pm_root_path": "wd",
+            "local_path": "<path>",
+            "rel_model_filepath": "mlp_train.pth",
+            "rel_dest_path": "model/<newid2>",
+            "description": "Registered model"
+        },
+        "inputs": {
+        },
+        "outputs":
+        {
+        },
+        "input_artifacts": {},
+        "output_artifacts": {"model":["<newid2>"]},
+        "savedState": {},
+        "status": ""
+    }
+}
