@@ -60,7 +60,7 @@ The project root directory includes a number of scripts. A brief description of 
 * [`./ev-demo`](./ev-demo) - execute single electric vehicle demo showing aws-do-pm capabilities
 * [`./ev-fleet-demo`](./ev-fleet-demo) - execute electric vehicle fleet demo showing aws-do-pm scale
 
-These scripts are availble both in the project root directory as well as the `/app/pm` directory in the platform container. It is preferable that scripts are exectuted from a platform container shell when possible. A shell can be opened by running `./exec.sh` while the platform is up.
+These scripts are availble both in the project root directory and in the platform container `/app/pm` directory. It is preferable that scripts are exectuted from a platform container shell when possible. A shell can be opened by running `./exec.sh` while the platform is up.
 
 # 3. Demo
 
