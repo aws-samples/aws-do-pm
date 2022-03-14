@@ -93,7 +93,9 @@ Enter value for KCFG_ENC [Enter=]:
 
 This script configures all necessary settings for the predictive modeling application. You can re-run the `./pm config set` command again if you wish to make additional changes. To edit a single value interactively, you can use `./pm config set <SETTING_NAME>`. To configure a setting with a particular value, you can use `./pm config set <SETTING_NAME> <VALUE>` and to enter expert configuration mode, you can execute `./config.sh`.  
 
-> Note: [Enter=] in the settings above, means that the default value is blank. When a value is not specifiec after the ":", it means that it is ok to leave it blank for docker-compose. Settings PV_TYPE, EFS_VOLUME_ID, ALB_ALLOW_CIDRS, and KCFG_ENC are needed only when the target orchestrator is Kubernetes. The PROCESSOR value specified here is a global setting. Each technique can be registered with a task-specific processor setting which overrides this value. If the processor is set to GPU and a GPU device is not available in the container, then the task will run on CPU.
+> Note: [Enter=] in the settings above, means that the default value is blank. When a value is not specifiec after the ":", it means that it is ok to leave it blank for docker-compose. Settings PV_TYPE, EFS_VOLUME_ID, ALB_ALLOW_CIDRS, and KCFG_ENC are needed only when the target orchestrator is Kubernetes. 
+
+> Note: The PROCESSOR value specified here is a global setting. Each technique can be registered with a task-specific processor setting which overrides this value (Example: [../src/python/pm/technique/technique_registration_model_build_ann.json](../src/python/pm/technique/technique_registration_model_build_ann.json) ). If the processor is set to GPU and a GPU device is not available in the container, then the task will run on CPU. If the processor is set to a blank string then CPU will be used by default.
 
 ## 3. Build
 

@@ -16,7 +16,7 @@
         "task_name": "sensitivity",
         "technique_name": "model_sensitivity_grpc",
         "task_options": ["-it","--rm","--restart=Never"],
-        "processor": "gpu",
+        "processor": "",
         "node_name": "analyze",
         "dataLocation": "",
         "infraSettings": {},

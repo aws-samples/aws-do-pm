@@ -15,7 +15,7 @@
         "task_name": "build",
         "technique_name": "model_build_ann",
         "task_options": ["-it", "--rm","--restart=Never"],
-        "processor": "gpu",
+        "processor": "",
         "node_name": "build",
         "created_dt": "<timestamp>",
         "dataLocation": "",
