@@ -17,31 +17,34 @@ The [aws-do-pm](https://github.com/aws-samples/aws-do-pm) framework scales both 
 <div align="center">
 <table align="center">
 <tr>
-<th>Orchestrator</th><th>Nodes</th><th>Groups</th><th>Vehicles</th><th>Routes</th><th>Time[min]</th>
+<th>Orchestrator</th><th>Nodes</th><th>Groups</th><th>Vehicles per Group</th><th>Total Vehicles<th>Routes</th><th>Time[min]</th>
 </tr>
 <tr>
-<td>Docker Desktop</td><td>1</td><td>1</td><td>1</td><td>3</td><td>3</td>
+<td>Docker Desktop</td><td>1</td><td>1</td><td>1</td><td>1</td><td>3</td><td>3</td>
 </tr>
 <tr>
-<td>Kubernetes</td><td>1</td><td>1</td><td>1</td><td>10</td><td>7</td>
+<td>Kubernetes</td><td>1</td><td>1</td><td>1</td><td>1</td><td>10</td><td>7</td>
 </tr>
 <tr>
-<td>Kubernetes</td><td>1</td><td>1</td><td>2</td><td>10</td><td>11</td>
+<td>Kubernetes</td><td>1</td><td>1</td><td>2</td><td>2</td><td>10</td><td>11</td>
 </tr>
 <tr>
-<td>Kubernetes</td><td>1</td><td>1</td><td>10</td><td>10</td><td>15</td>
+<td>Kubernetes</td><td>1</td><td>1</td><td>10</td><td>10</td><td>10</td><td>15</td>
 </tr>
 <tr>
-<td>Kubernetes</td><td>10</td><td>10</td><td>100</td><td>10</td><td>16</td>
+<td>Kubernetes</td><td>10</td><td>10</td><td>10</td><td>100</td><td>10</td><td>16</td>
 </tr>
 <tr>
-<td>Kubernetes</td><td>100</td><td>100</td><td>1000</td><td>10</td><td>32</td>
+<td>Kubernetes</td><td>100</td><td>50</td><td>20</td><td>1000</td><td>10</td><td>29</td>
 </tr>
 </table>
 Table 1. - aws-do-pm ev-fleet-demo scale
 </div>
 
-For the purpose of this document, we will demonstrate 100 vehicles on a 10 node cluster with 10 parallel groups, running 10 vehicles each for up to 10 routes. It is possible to use cluster and pod autoscaling, and this would be the recommended approach for large deployments with unpredictable workloads and tolerance to latency. In order to demonstrate the concept for this demo, we will use manual scaling. 
+<p>
+<br/>
+For the purpose of this document, we will demonstrate 100 vehicles on a 10 node cluster with 10 parallel groups, running 10 vehicles each for up to 10 routes. It is possible to use cluster and pod autoscaling, and this would be the recommended approach for large deployments with unpredictable workloads and tolerance to latency. In order to demonstrate the concept for this demo, we will use manual scaling. To scale the deployment for 1000 vehicles we used 50 groups of 20 vehicles each. Each group is a parallel process which sends requests to the cluster API independently. When running 100 or more groups in a single cluster, the Kubernetes API may get overwhelmed with requests and cause failure of aws-do-pm tasks. In such scenarios, consider reducing the number of groups (by setting the `PM_PLATFORM_SCALE` value to a lower number) and increasing the number of vehicles per group (by editing the demo configuration file [../src/python/example/ev/ev_fleet_demo.json](../src/python/example/ev/ev_fleet_demo.json)). If a suitable combination of number of groups and number of vehicles per group cannot be found in a single cluster, consider scaling your workload horizontally across several Kubernetes clusters.
+</p>
 
 ### 1.1. Scale cluster
 We will assume that an EKS cluster with 10 c5.4xlarge nodes is already available. If needed, please refer to the [aws-do-eks](https://github.com/aws-samples/aws-do-eks) project and the [detailed aws-do-pm walkthrough](docs/Deployment.md) for details about setting up and scaling an EKS cluster.
