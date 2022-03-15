@@ -30,6 +30,12 @@ export QUIET=true
 export PYTHONPATH=${PROJECT_HOME}/src/python
 stty sane
 
+# If needed, set target orchestrator
+if [ ! "$TO" == "$PM_TO" ]; then
+        echo $PM_TO > wd/.to
+        source .env
+fi
+
 NUM_PLATFORM_CONTAINERS=$(./status.sh | grep platform | wc -l)
 
 echo ""

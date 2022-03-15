@@ -39,6 +39,12 @@ export NUM_PREDICTED_ROUTES=3
 # Model update threshold. If the prediction error is greater than this value, the model for the current vehicle will be udpated.
 export MODEL_UPDATE_THRESHOLD=0.05
 
+# If needed, set target orchestrator
+if [ ! "$TO" == "$PM_TO" ]; then
+        echo $PM_TO > wd/.to
+        source .env
+fi
+
 ############################################################################################
 
 

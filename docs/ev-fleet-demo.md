@@ -127,6 +127,8 @@ Output:
 root@platform-5c4f55f97f-46g8l:/app/pm#
 ```
 
+> Note: `ev-fleet-demo` must be executed from the first platform container 
+
 ## 3. Configure
 
 ### 3.1. Platform
