@@ -27,7 +27,7 @@ Fig 2. - aws-do-pm architecture
 
 Please refer to the [framework](./docs/framework.md) documentation for an architectural deep-dive.
 
-The rest of the document details the process of building and running predictive modeling applications with this framework. You can see an abbreviated walkthrough in this [YouTube video](https://bit.ly/aws-do-pm-video)
+The rest of the document details the process of building and running predictive modeling applications with this framework. You can see an abbreviated walkthrough in this [YouTube video](https://bit.ly/aws-do-pm-video).
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/4i6issYj_Zw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
