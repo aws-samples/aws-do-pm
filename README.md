@@ -27,6 +27,12 @@ Fig 2. - aws-do-pm architecture
 
 Please refer to the [framework](./docs/framework.md) documentation for an architectural deep-dive.
 
+The rest of the document details the process of building and running predictive modeling applications with this framework. You can see an abbreviated walkthrough in this [YouTube video](https://bit.ly/aws-do-pm-video)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4i6issYj_Zw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+The content shown in the video can be reproduced by following the steps below. 
+
 # 0. Prerequisites
 There are only two prerequisites that are needed to complete all the steps in this project.
 
@@ -112,3 +118,4 @@ This repository is released under the MIT-0 License. See the [LICENSE](LICENSE) 
 * [Depend on Docker Project](https://github.com/iankoulski/depend-on-docker)
 * [AWS Do Docker Project](https://github.com/aws-samples/aws-do-docker)
 * [EKS Project](https://github.com/aws-samples/aws-do-eks)
+* [aws-do-pm walkthrough video](https://www.youtube.com/watch?v=4i6issYj_Zw)
