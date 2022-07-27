@@ -1,0 +1,16 @@
+{
+  "robustness_params": {
+    "n_repeats": 10
+  },
+  "embedding_params": {
+    "n_neighbors": 15,
+    "n_components": 3,
+    "min_dist": 0.02,
+    "metric": "cosine",
+    "n_epochs": 200
+  },
+  "cluster_params": {
+    "min_samples": 5,
+    "eps": 0.3
+  }
+}

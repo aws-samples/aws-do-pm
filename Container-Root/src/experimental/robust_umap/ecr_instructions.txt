@@ -1,0 +1,37 @@
+docker rmi -f $(docker images -f "dangling=true" -q)
+
+aws ecr create-repository --repository-name workload
+docker tag workload 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS \
+    --password-stdin 561120826261.dkr.ecr.us-east-1.amazonaws.com
+
+docker push 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload
+
+# Create a Job
+workload-job-def.json created in workspace directory
+
+aws batch register-job-definition --cli-input-json file://workload-job-def.json
+
+# Submit and AWS Batch Array Job
+workload-job.json created to launch the job
+
+aws batch submit-job --cli-input-json file://workload-job.json
+
+----------------
+Tag the workload_dash and upload to ecr
+docker tag workload_dash 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload_dash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS \
+    --password-stdin 561120826261.dkr.ecr.us-east-1.amazonaws.com
+
+docker push 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload_dash
+
+aws ecr get-login --region 'us-east-1' --no-include-email
+
+docker pull 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload_dash
+
+docker run -it -p8050:8050 561120826261.dkr.ecr.us-east-1.amazonaws.com/workload_dash:latest
+docker run -it -p8050:8050 workload_dash:latest
+
+---------
+▶ aws s3 cp s3://workload-model-store/scenario4/sobol_sensitivity_1000junk . --recursive  --include "*.p"

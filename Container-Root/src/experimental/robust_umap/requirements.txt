@@ -1,0 +1,12 @@
+pandas
+numpy
+scipy
+scikit-learn
+matplotlib
+seaborn
+h5py
+pyDOE
+dill
+dynamodb-json
+inspyred
+boto3

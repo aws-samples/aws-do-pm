@@ -1,0 +1,57 @@
+[
+  {
+    "tree_path": [
+      "embedding_params",
+      "n_neighbors"
+    ],
+    "type_bounds": {
+      "type": "int",
+      "lb": 10,
+      "ub": 20
+    }
+  },
+  {
+    "tree_path": [
+      "embedding_params",
+      "n_components"
+    ],
+    "type_bounds": {
+      "type": "int",
+      "lb": 2,
+      "ub": 6
+    }
+  },
+  {
+    "tree_path": [
+      "embedding_params",
+      "min_dist"
+    ],
+    "type_bounds": {
+      "type": "float",
+      "lb": 0.02,
+      "ub": 0.1
+    }
+  },
+  {
+    "tree_path": [
+      "cluster_params",
+      "min_samples"
+    ],
+    "type_bounds": {
+      "type": "int",
+      "lb": 5,
+      "ub": 15
+    }
+  },
+  {
+    "tree_path": [
+      "cluster_params",
+      "eps"
+    ],
+    "type_bounds": {
+      "type": "float",
+      "lb": 0.3,
+      "ub": 1
+    }
+  }
+]

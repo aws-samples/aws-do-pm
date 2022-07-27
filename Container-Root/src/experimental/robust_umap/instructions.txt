@@ -1,0 +1,65 @@
+
+Step 1: Batch Setup
+
+batch_service_role = arn:aws:iam::561120826261:role/service-role/AWSBatchServiceRole
+- Batch Service Role with Access to S3 and DynamoDB
+
+batch_security_group_ids = sg-dce197f9
+- Users Standard Security Group which is used to launch all the EC2 instances
+
+batch_vpcid = vpc-c7c326ba
+batch_subnets = subnet-15776b2b subnet-5d8e597c subnet-6337ae2e subnet-eb0380e5 subnet-4ee52c28 subnet-1a559f45
+- Users Standard VPC and Subnet
+
+batch_instance_role = arn:aws:iam::561120826261:instance-profile/EC2_AllAccess
+batch_ec2_key_pair = mahaaws_east1.pem
+- Users PEM key to launch instances in compute environment
+
+Create 6 Compute Environments
+- compute-environment-1
+- compute-environment-2
+- compute-environment-3
+- compute-environment-4
+- compute-environment-5
+- compute-environment-6
+
+Create 6 Job Queues
+- ce1_job_queue
+- ce2_job_queue
+- ce3_job_queue
+- ce4_job_queue
+- ce5_job_queue
+- ce6_job_queue
+
+
+IAM Roles: EC2_AllAccess
+
+
+Step 2: ECR Creation for workload
+
+Step 3: Create a Base Job definition that points to the ECR location with
+vCPUs: 1
+Memory: 16000 MiB
+Will automatically create a ecsTaskExecutionRole
+
+Step 4: Checkout the Code and copy  config_template.properties --> config.properties
+[Enter your specific details]
+
+- Create S3 Buckets 
+(mldatastore): s3://mldatastore/mlworkloaddata
+- I will share bigdata yearwise 357 column and bigdata yearwise folder.
+- This is where the code will pick all the base reference files
+- https://amazon.awsapps.com/workdocs/index.html#/folder/87986d1f80b0b5100176b0d208bd1d7fa185af0b23121d4d0d460867d8087714
+
+(workload-scenario): s3://workload-model-store/scenario11/reference
+- scenario1
+-- reference
+[Specific to our Analysis]: col_scaled_revenue_2019.csv
+
+Step 5: Setup the GA Section Information properly
+
+Step 6: Launch script_ga_batch_launch.py
+
+-----------------------------------------
+
+Step 7: 

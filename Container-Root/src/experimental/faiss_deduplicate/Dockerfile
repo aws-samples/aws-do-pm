@@ -1,0 +1,35 @@
+FROM nvidia/cuda:11.1.1-runtime-ubuntu20.04
+
+LABEL description="FAISS_GPU Container"
+
+RUN apt-get update && apt-get install -y htop vim wget curl software-properties-common debconf-utils python3-distutils dnsutils bc unzip nano
+
+RUN apt-get install curl unzip -y && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install
+
+# Install python3.9
+RUN DEBIAN_FRONTEND=noninteractive; add-apt-repository -y ppa:deadsnakes/ppa; apt install -y python3.9; update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+
+# Install pip
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py; python get-pip.py; rm -f get-pip.py
+
+# Install pytorch with GPU support
+RUN pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+
+RUN echo "PATH=/usr/local/cuda/bin\${PATH:+:\${PATH}}" >> /etc/environment
+RUN echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}" >> /etc/environment
+
+# Install other python libraries
+RUN pip install configparser configargparse boto3 scikit-learn tqdm
+
+RUN pip install -U sentence-transformers
+
+ADD requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Add Container content
+#ADD Container-Root/src/python/embedding /src/python/embedding
+#ADD Container-Root/src/python/similarity /src/python/similarity
+
